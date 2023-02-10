@@ -1,23 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { Form, Formik, Field } from "formik";
+import './header.css'
+import './content.css'
+import './article.css'
 
-function App() {
+
+const App = () => {
+  const [photos, setPhotos] = useState([])
+  const open = url => {
+    window.open(url)
+  }
+  console.log( {photos} )
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+
+      <header>
+        <Formik
+          initialValues={ {search: ''} }
+          onSubmit={async values => {
+            // llamar API unsplash
+            const response = await fetch(`https://api.unsplash.com/search/photos?per_page=20&query=${values.search}`, {
+              headers: {
+                'Authorization': 'Client-ID kwu6Et5eAqNJawoG9Gqx7WZuXiazlnqnU35XcvI844s'
+              }
+            })
+            const data = await response.json()
+            setPhotos(data.results)
+          }}
         >
-          Learn React
-        </a>
+          <Form>
+            <Field name='search' /> 
+          </Form>
+        </Formik>
       </header>
+
+      <div className="container">
+        <div className="center">
+          {photos.map( p =>
+            <article key={p.id} onClick={ () => open(p.links.html)}>
+              <img src={p.urls.regular}/>
+              <p>{[p.description, p.alt_description].join(' - ')}</p>
+            </article>
+          )}
+        </div>
+      </div>
+      
     </div>
   );
 }
